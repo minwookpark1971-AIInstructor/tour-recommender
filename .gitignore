@@ -1,0 +1,10 @@
+.env
+.claude/settings.local.json
+.claude/.pass_baseline
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+data/processed/*.parquet
+# 합성 데이터는 키가 없을 때 자동 생성되는 산출물이다
+data/raw/synthetic_*.json

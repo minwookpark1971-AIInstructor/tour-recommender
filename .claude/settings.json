@@ -1,0 +1,55 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "allow": [
+      "Read",
+      "Edit(src/**)",
+      "Write(src/**)",
+      "Edit(tests/**)",
+      "Write(tests/**)",
+      "Bash(python *)",
+      "Bash(pip install *)",
+      "Bash(streamlit run *)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git add *)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Edit(./.env)",
+      "Edit(./tests/test_acceptance.py)",
+      "Write(./tests/test_acceptance.py)"
+    ],
+    "ask": [
+      "Bash(git push *)",
+      "Bash(rm *)"
+    ]
+  },
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "python .claude/hooks/guard_secrets.py" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "python .claude/hooks/regression_gate.py" }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|compact",
+        "hooks": [
+          { "type": "command", "command": "python .claude/hooks/session_brief.py" }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "_주석": "골든셋 - 리팩터링이 추천 결과를 조용히 망가뜨리는 것을 잡는다. 시드가 하나뿐이면 그 한 곳만 안 바뀌어도 통과해버리므로 cat1 x 콘텐츠타입 조합마다 하나씩 골라 카탈로그 전체를 덮는다.",
+  "_생성기준": "실데이터 237건(공주 반경 30km), detailCommon2 개요 포함",
+  "content_based": [
+    {
+      "seed_item": "125428",
+      "seed_title": "칠갑산자연휴양림",
+      "cat1": "A01",
+      "content_type_id": 12,
+      "must_not_include": [
+        "125428"
+      ],
+      "top_k": 5,
+      "min_score_std": 1e-06,
+      "expected_top5": [
+        "125819",
+        "127563",
+        "2752308",
+        "127316",
+        "127314"
+      ],
+      "expected_top5_titles": [
+        "칠갑산도립공원",
+        "천장호",
+        "온빛자연휴양림",
+        "칠갑산 장승공원",
+        "냉천골"
+      ]
+    },
+    {
+      "seed_item": "1114077",
+      "seed_title": "계룡산신도내주초석석재",
+      "cat1": "A02",
+      "content_type_id": 12,
+      "must_not_include": [
+        "1114077"
+      ],
+      "top_k": 5,
+      "min_score_std": 1e-06,
+      "expected_top5": [
+        "1114207",
+        "1114200",
+        "1114250",
+        "1954463",
+        "1956390"
+      ],
+      "expected_top5_titles": [
+        "두마신원재",
+        "염선재",
+        "모원재",
+        "공주향교",
+        "용문서원"
+      ]
+    },
+    {
+      "seed_item": "129787",
+      "seed_title": "국립공주박물관",
+      "cat1": "A02",
+      "content_type_id": 14,
+      "must_not_include": [
+        "129787"
+      ],
+      "top_k": 5,
+      "min_score_std": 1e-06,
+      "expected_top5": [
+        "130866",
+        "130171",
+        "130896",
+        "130270",
+        "1885454"
+      ],
+      "expected_top5_titles": [
+        "지당자연사박물관",
+        "공주민속극박물관",
+        "백제군사박물관",
+        "임립미술관",
+        "백제원(부여)"
+      ]
+    },
+    {
+      "seed_item": "133391",
+      "seed_title": "옛날어씨네집",
+      "cat1": "A05",
+      "content_type_id": 39,
+      "must_not_include": [
+        "133391"
+      ],
+      "top_k": 5,
+      "min_score_std": 1e-06,
+      "expected_top5": [
+        "2877229",
+        "2824382",
+        "2736661",
+        "133392",
+        "2876729"
+      ],
+      "expected_top5_titles": [
+        "신풍매운탕",
+        "까치집",
+        "곰골식당",
+        "새이학가든",
+        "곰선생동태씨"
+      ]
+    }
+  ],
+  "collaborative": [
+    {
+      "user_id": "U001",
+      "min_results": 5,
+      "must_exclude_visited": true,
+      "expected_top5": [
+        "2735160",
+        "2876940",
+        "129557",
+        "1114207",
+        "3558956"
+      ],
+      "visited_count": 11
+    },
+    {
+      "user_id": "U002",
+      "min_results": 5,
+      "must_exclude_visited": true,
+      "expected_top5": [
+        "2734930",
+        "133943",
+        "1626991",
+        "2834369",
+        "129572"
+      ],
+      "visited_count": 16
+    },
+    {
+      "user_id": "U025",
+      "min_results": 5,
+      "must_exclude_visited": true,
+      "expected_top5": [
+        "2755172",
+        "127314",
+        "2750146",
+        "125819",
+        "127316"
+      ],
+      "visited_count": 15
+    },
+    {
+      "user_id": "U050",
+      "min_results": 5,
+      "must_exclude_visited": true,
+      "expected_top5": [
+        "3558956",
+        "1937772",
+        "2752563",
+        "1626991",
+        "2735160"
+      ],
+      "visited_count": 15
+    }
+  ],
+  "cold_start": [
+    {
+      "user_id": "U_NEW_COLD",
+      "expect": "popular_fallback",
+      "no_exception": true,
+      "min_results": 5
+    }
+  ]
+}
