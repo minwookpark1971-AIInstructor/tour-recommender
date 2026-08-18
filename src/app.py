@@ -1,10 +1,18 @@
 """F6: Streamlit 웹 화면. 선호를 고르면 추천 카드·지도·코스를 보여준다."""
-import pandas as pd
-import streamlit as st
+import pathlib
+import sys
 
-from src.course import SLOTS, build_course
-from src.preprocess import get_visited, load_profiles, load_spots
-from src.recommender import recommend_by_cf, recommend_by_content
+# `streamlit run src/app.py` 로 실행하면 파이썬 검색 경로가 src/ 로 잡혀
+# 아래 `from src.course import ...` 가 src/src/course.py 를 찾다가 실패한다.
+# 그래서 import 보다 먼저 저장소 루트를 검색 경로에 넣는다.
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
+
+import pandas as pd                                            # noqa: E402
+import streamlit as st                                         # noqa: E402
+
+from src.course import SLOTS, build_course                     # noqa: E402
+from src.preprocess import get_visited, load_profiles, load_spots  # noqa: E402
+from src.recommender import recommend_by_cf, recommend_by_content  # noqa: E402
 
 THEMES = {"전체": None, "자연": "A01", "역사·문화": "A02", "맛집": "A05"}
 
