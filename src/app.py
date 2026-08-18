@@ -1,6 +1,7 @@
 """F6: Streamlit 웹 화면. 선호를 고르면 추천 카드·지도·코스를 보여준다."""
 import pathlib
 import sys
+from urllib.parse import quote
 
 # `streamlit run src/app.py` 로 실행하면 파이썬 검색 경로가 src/ 로 잡혀
 # 아래 `from src.course import ...` 가 src/src/course.py 를 찾다가 실패한다.
@@ -8,6 +9,7 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
 import pandas as pd                                            # noqa: E402
+import pydeck as pdk                                           # noqa: E402
 import streamlit as st                                         # noqa: E402
 
 from src.course import SLOTS, build_course                     # noqa: E402
@@ -63,14 +65,48 @@ def show_map(rows: pd.DataFrame, size: int = 200) -> None:
     st.map(rows[["lat", "lng"]].rename(columns={"lng": "lon"}), size=size)
 
 
+def naver_link(item: dict) -> str:
+    """네이버 지도에서 그 장소를 찾는 주소를 만든다. API 키 없이 동작한다."""
+    return "https://map.naver.com/p/search/" + quote(f"{item['title']} {item['addr']}")
+
+
+def show_course_map(course: dict) -> None:
+    """코스를 순서대로 선으로 잇고 번호를 찍는다. st.map 은 점만 찍고 선을 못 그린다."""
+    pts = [{"lng": course[s]["lng"], "lat": course[s]["lat"],
+            "label": f"{i + 1}. {s} · {course[s]['title']}"} for i, s in enumerate(SLOTS)]
+    st.pydeck_chart(pdk.Deck(
+        initial_view_state=pdk.ViewState(
+            latitude=sum(p["lat"] for p in pts) / len(pts),
+            longitude=sum(p["lng"] for p in pts) / len(pts), zoom=10.5),
+        layers=[
+            pdk.Layer("PathLayer", data=[{"path": [[p["lng"], p["lat"]] for p in pts]}],
+                      get_path="path", get_color=[230, 80, 60], width_min_pixels=3),
+            pdk.Layer("ScatterplotLayer", data=pts, get_position=["lng", "lat"],
+                      get_radius=250, get_fill_color=[30, 100, 220], pickable=True),
+            pdk.Layer("TextLayer", data=pts, get_position=["lng", "lat"], get_text="label",
+                      get_size=13, get_color=[20, 20, 20], get_pixel_offset=[0, -24]),
+        ],
+        tooltip={"text": "{label}"}))
+
+
 def show_course(user_id: str, only_gongju: bool) -> None:
-    """오전-점심-오후-저녁 코스를 타임라인으로 보여준다."""
+    """오전-점심-오후-저녁 코스를 사진·구간거리·경로와 함께 보여준다."""
     course = build_course(user_id, only_gongju=only_gongju)
-    for col, slot in zip(st.columns(4), SLOTS):
+    legs = {leg["to"]: leg["km"] for leg in course.get("_legs", [])}
+
+    for i, (col, slot) in enumerate(zip(st.columns(4), SLOTS)):
+        item = course[slot]
         with col:
-            st.markdown(f"### {slot}")
-            st.markdown(f"**{course[slot]['title']}**")
-            st.caption(course[slot]["addr"])
+            st.markdown(f"### {i + 1}. {slot}")
+            # 앞 슬롯에서 여기까지 얼마나 이동하는지. 총합만 보면 어디가 먼지 알 수 없다.
+            st.caption(f"이동 {legs[slot]} km" if slot in legs else "여기서 출발")
+            if item["image"]:
+                st.image(item["image"], use_container_width=True)
+            st.markdown(f"**{item['title']}**")
+            st.caption(item["addr"])
+            if item["overview"]:
+                st.caption(item["overview"][:90] + ("…" if len(item["overview"]) > 90 else ""))
+            st.markdown(f"[네이버 지도에서 보기 ↗]({naver_link(item)})")
 
     km = course["_total_km"]
     if course.get("_over_limit"):
@@ -78,7 +114,7 @@ def show_course(user_id: str, only_gongju: bool) -> None:
         st.warning(f"총 이동거리 {km} km — 기준 60km 를 넘었습니다. 음식점 후보가 부족합니다.")
     else:
         st.success(f"총 이동거리 {km} km (기준 60km 이하)")
-    show_map(pd.DataFrame([course[s] for s in SLOTS]), size=250)
+    show_course_map(course)
 
 
 def sidebar(profiles: pd.DataFrame) -> tuple[str, str | None, bool]:

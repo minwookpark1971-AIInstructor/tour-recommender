@@ -67,7 +67,8 @@ def build_spots_table() -> pd.DataFrame:
             "addr": addr,
             "content_type_id": int(r.get("contenttypeid") or 0),
             "overview": (r.get("overview") or title).strip(),
-            "image": (r.get("firstimage") or "").strip(),
+            # 배포 화면은 https 라 http 이미지는 브라우저가 차단한다. https 로 바꾼다.
+            "image": (r.get("firstimage") or "").strip().replace("http://", "https://"),
             "is_gongju": "공주" in addr,
         })
 

@@ -30,7 +30,9 @@ def _as_slot(row: pd.Series) -> dict:
     """데이터프레임 한 줄을 코스 슬롯 하나로 바꾼다."""
     return {"id": str(row["id"]), "title": str(row["title"]),
             "lat": float(row["lat"]), "lng": float(row["lng"]),
-            "addr": str(row["addr"]), "cat1": str(row["cat1"])}
+            "addr": str(row["addr"]), "cat1": str(row["cat1"]),
+            "image": str(row.get("image", "") or ""),
+            "overview": str(row.get("overview", "") or "")}
 
 
 def _pick_next(pool: pd.DataFrame, lat: float, lng: float,
@@ -50,18 +52,22 @@ def _build_from(seed: pd.Series, sights: pd.DataFrame, foods: pd.DataFrame,
     """시작 관광지 하나를 받아 4슬롯을 이어붙인다. avoid 에 든 곳은 쓰지 않는다."""
     used = set(avoid) | {str(seed["id"])}
     course = {"오전": _as_slot(seed)}
-    total, cur = 0.0, seed
+    total, cur, prev = 0.0, seed, "오전"
+    legs = []   # 구간별 이동거리. 총합만 있으면 어디서 멀리 가는지 알 수 없다.
 
     for slot, pool in [("점심", foods), ("오후", sights), ("저녁", foods)]:
         nxt = _pick_next(pool, cur["lat"], cur["lng"], used, pref)
         if nxt is None:
             return None
-        total += haversine_km(cur["lat"], cur["lng"], nxt["lat"], nxt["lng"])
+        km = haversine_km(cur["lat"], cur["lng"], nxt["lat"], nxt["lng"])
+        total += km
+        legs.append({"from": prev, "to": slot, "km": round(km, 2)})
         course[slot] = _as_slot(nxt)
         used.add(str(nxt["id"]))
-        cur = nxt
+        cur, prev = nxt, slot
 
     course["_total_km"] = round(total, 2)
+    course["_legs"] = legs
     return course
 
 

@@ -4,5 +4,6 @@ scikit-learn>=1.5
 requests>=2.32
 python-dotenv>=1.0
 streamlit>=1.38
+pydeck>=0.9
 pyarrow>=17.0
 pytest>=8.3
