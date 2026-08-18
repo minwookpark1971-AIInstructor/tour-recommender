@@ -87,18 +87,28 @@ def sidebar(profiles: pd.DataFrame) -> tuple[str, str | None, bool]:
     age = st.sidebar.selectbox("연령대", ["전체"] + sorted(profiles["age_group"].unique()))
     gender = st.sidebar.selectbox("성별", ["전체"] + sorted(profiles["gender"].unique()))
 
-    # 연령대·성별로 비슷한 프로필의 가상 유저만 남긴다
-    pool = profiles
+    # 조건에 맞는 유저를 목록 앞으로 올리고 ★ 를 붙인다.
+    # 목록에서 빼버리면 조합에 따라 후보가 1~2명까지 줄어 화면이 이상해진다.
+    match = profiles
     if age != "전체":
-        pool = pool[pool["age_group"] == age]
+        match = match[match["age_group"] == age]
     if gender != "전체":
-        pool = pool[pool["gender"] == gender]
-    if pool.empty:
-        st.sidebar.warning("조건에 맞는 유저가 없어 전체에서 고릅니다.")
-        pool = profiles
+        match = match[match["gender"] == gender]
+    # 조건을 안 걸었으면 전원이 일치이므로 ★ 를 붙이지 않는다(전부 붙으면 의미가 없다)
+    filtered = age != "전체" or gender != "전체"
+    matched = set(match["user_id"]) if filtered else set()
 
-    user_id = st.sidebar.selectbox(f"유저 선택 ({len(pool)}명)",
-                                   sorted(pool["user_id"].tolist()))
+    info = profiles.set_index("user_id")
+    order = sorted(profiles["user_id"], key=lambda u: (u not in matched, u))
+    label = (f"유저 선택 (조건 일치 {len(matched)}명 / 전체 {len(profiles)}명)"
+             if filtered else f"유저 선택 ({len(profiles)}명)")
+    user_id = st.sidebar.selectbox(
+        label, order,
+        format_func=lambda u: (f"{'★ ' if u in matched else ''}{u} · "
+                               f"{info.loc[u, 'age_group']}대 {info.loc[u, 'gender']}"))
+    if filtered and not matched:
+        st.sidebar.caption("이 조건에 해당하는 가상 유저는 없습니다. 목록은 전체를 보여줍니다.")
+
     theme = st.sidebar.selectbox("선호 테마", list(THEMES))
     only_gongju = st.sidebar.checkbox("공주 지역만 보기", value=True)
     return user_id, THEMES[theme], only_gongju
